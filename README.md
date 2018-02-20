@@ -1,5 +1,7 @@
 # LZF
 
+[![Build Status](https://travis-ci.org/joshuawscott/lzf_elixir.svg?branch=master)](https://travis-ci.org/joshuawscott/lzf_elixir) [![Hex.pm](https://img.shields.io/hexpm/v/plug.svg)]()
+
 Pure elixir implementation of the LZF (de)compression algorithm
 
 As of 0.1, this only supports decompression. PRs welcome :)
