@@ -1,0 +1,8 @@
+language: elixir
+otp_release:
+- '19.3'
+- '20.2'
+elixir:
+- '1.4.5'
+- '1.5.3'
+- '1.6.1'
