@@ -1,4 +1,4 @@
-# Lzf
+# LZF
 
 Pure elixir implementation of the LZF (de)compression algorithm
 

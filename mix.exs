@@ -4,9 +4,12 @@ defmodule Lzf.MixProject do
   def project do
     [
       app: :lzf,
-      version: "0.1.0",
+      version: "0.1.1",
       elixir: "~> 1.4",
+      build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
+      description: description(),
+      package: package(),
       deps: deps()
     ]
   end
@@ -21,5 +24,20 @@ defmodule Lzf.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     []
+  end
+
+  defp description do
+    """
+    LZF decompression algorithm in pure Elixir
+    """
+  end
+
+  defp package do
+    [
+      licenses: ["MIT"],
+      source_url: "https://github.com/joshuawscott/lzf_elixir",
+      maintainers: ["Joshua Scott"],
+      links: %{"GitHub" => "https://github.com/joshuawscott/lzf_elixir"}
+    ]
   end
 end
