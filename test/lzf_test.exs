@@ -38,7 +38,7 @@ defmodule LzfTest do
 
   test "plain chunk" do
     expected = "abcdefghij"
-    compressed = <<0x5a, 0x56, 0x00, 0x00, 0x0a, "abcdefghij">>
+    compressed = <<0x5A, 0x56, 0x00, 0x00, 0x0A, "abcdefghij">>
     decompressed = Lzf.decompress(compressed)
     assert decompressed == expected
   end

@@ -26,12 +26,15 @@ defmodule Lzf do
 
   # Start of a chunk
   def parse_chunks(<<"ZV", rest::binary>>, chunks) do
-    parse_chunks rest, chunks
+    parse_chunks(rest, chunks)
   end
 
   # Uncompressed Chunk
-  def parse_chunks(<<0::size(8), chunk_length::size(16), chunk::binary-size(chunk_length), rest::binary()>>, chunks) do
-    parse_chunks(rest, [chunk|chunks])
+  def parse_chunks(
+        <<0::size(8), chunk_length::size(16), chunk::binary-size(chunk_length), rest::binary()>>,
+        chunks
+      ) do
+    parse_chunks(rest, [chunk | chunks])
   end
 
   # Compressed chunk
@@ -101,9 +104,11 @@ defmodule Lzf do
   defp copy_backreference(decompressed, offset, run_length) do
     len = :erlang.byte_size(decompressed)
     start = len - offset
+
     case decompressed do
       <<_::binary-size(start), copied::binary-size(run_length), _::binary()>> ->
         copied
+
       <<_::binary-size(start), rest::binary()>> ->
         size = :erlang.byte_size(rest)
         copies = div(run_length, size)
