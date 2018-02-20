@@ -1,6 +1,6 @@
 # LZF
 
-[![Build Status](https://travis-ci.org/joshuawscott/lzf_elixir.svg?branch=master)](https://travis-ci.org/joshuawscott/lzf_elixir) [![Hex.pm](https://img.shields.io/hexpm/v/plug.svg)]()
+[![Build Status](https://travis-ci.org/joshuawscott/lzf_elixir.svg?branch=master)](https://travis-ci.org/joshuawscott/lzf_elixir) [![Hex.pm version](https://img.shields.io/hexpm/v/lzf.svg)](https://hex.pm/packages/lzf)
 
 Pure elixir implementation of the LZF (de)compression algorithm
 
