@@ -39,15 +39,11 @@ defmodule Lzf do
 
   # Compressed chunk
   def parse_chunks(
-        <<1::size(8), chunk_length::size(16), original_length::size(16),
+        <<1::size(8), chunk_length::size(16), _original_length::size(16),
           compressed_chunk::binary-size(chunk_length), rest::binary>>,
         chunks
       ) do
     chunk = decompress_chunk(compressed_chunk)
-
-    if :erlang.byte_size(chunk) != original_length do
-      IO.inspect("expected #{original_length}, got #{:erlang.byte_size(chunk)}")
-    end
 
     parse_chunks(rest, [chunk | chunks])
   end
@@ -58,28 +54,13 @@ defmodule Lzf do
 
   # Literal run
   def decompress_chunk(
-        <<segment_code::integer-size(8), rest::binary>>,
+        <<0::size(3), segment_code::integer-size(5), rest::binary>>,
         position,
         decompressed
-      )
-      when segment_code < 0x20 do
+      ) do
     size = segment_code + 1
     <<run::binary-size(size), rest::binary>> = rest
     decompress_chunk(rest, position + size, decompressed <> run)
-  end
-
-  # Short backreference
-  def decompress_chunk(
-        <<run_length_code::size(3), offset_code::size(13), rest::binary>>,
-        position,
-        decompressed
-      )
-      when run_length_code >= 1 and run_length_code <= 6 do
-    run_length = run_length_code + 2
-    offset = offset_code + 1
-    copied = copy_backreference(decompressed, offset, run_length)
-    bytes_copied = :erlang.byte_size(copied)
-    decompress_chunk(rest, position + bytes_copied, decompressed <> copied)
   end
 
   # Long backreference
@@ -92,8 +73,19 @@ defmodule Lzf do
     <<offset_code::size(16)>> = <<0::size(3), high_offset_code::size(5), low_offset_code>>
     run_length = run_length_code + 9
     offset = offset_code + 1
-    copied = copy_backreference(decompressed, offset, run_length)
-    bytes_copied = :erlang.byte_size(copied)
+    {copied, bytes_copied} = copy_backreference(decompressed, offset, run_length)
+    decompress_chunk(rest, position + bytes_copied, decompressed <> copied)
+  end
+
+  # Short backreference
+  def decompress_chunk(
+        <<run_length_code::size(3), offset_code::size(13), rest::binary>>,
+        position,
+        decompressed
+      ) do
+    run_length = run_length_code + 2
+    offset = offset_code + 1
+    {copied, bytes_copied} = copy_backreference(decompressed, offset, run_length)
     decompress_chunk(rest, position + bytes_copied, decompressed <> copied)
   end
 
@@ -107,14 +99,21 @@ defmodule Lzf do
 
     case decompressed do
       <<_::binary-size(start), copied::binary-size(run_length), _::binary()>> ->
-        copied
+        {copied, run_length}
 
       <<_::binary-size(start), rest::binary()>> ->
-        size = :erlang.byte_size(rest)
-        copies = div(run_length, size)
-        remainder = rem(run_length, size)
-        extra = :binary.part(rest, {0, remainder})
-        String.duplicate(rest, copies) <> extra
+        bytes_available = :erlang.byte_size(rest)
+        copies = div(run_length, bytes_available)
+        remainder = rem(run_length, bytes_available)
+
+        case remainder do
+          0 ->
+            {:binary.copy(rest, copies), run_length}
+
+          _ ->
+            extra = :binary.part(rest, {0, remainder})
+            {:binary.copy(rest, copies) <> extra, run_length}
+        end
     end
   end
 end
